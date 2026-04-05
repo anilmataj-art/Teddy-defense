@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teddy Defense 🧸</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --cream: #FFF8E7;
+    --warm-brown: #8B5E3C;
+    --caramel: #C8864E;
+    --honey: #F4A425;
+    --honey-light: #FEDD8B;
+    --forest: #4A7C59;
+    --forest-light: #6BAE7C;
+    --sky: #87CEEB;
+    --rose: #E8636A;
+    --lavender: #9B7EC8;
+    --mint: #5BB8A0;
+    --path-color: #D4A574;
+    --path-dark: #B8845A;
+    --grass: #7DBF6E;
+    --grass-dark: #5A9E4A;
+    --ui-bg: #3D2314;
+    --ui-panel: #5C3820;
+    --ui-border: #C8864E;
+    --shadow: rgba(0,0,0,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1A0F08;
+    font-family: 'Nunito', sans-serif;
+    color: var(--cream);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+  }
+
+  /* HEADER */
+  #header {
+    background: var(--ui-bg);
+    border-bottom: 3px solid var(--ui-border);
+    padding: 6px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+
+  #header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 24px;
+    color: var(--honey);
+    text-shadow: 2px 2px 0 var(--warm-brown);
+    letter-spacing: 1px;
+  }
+
+  .stat-group { display: flex; gap: 20px; align-items: center; }
+
+  .stat {
+    background: var(--ui-panel);
+    border: 2px solid var(--ui-border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 800;
+    font-size: 15px;
+  }
+
+  .stat .icon { font-size: 18px; }
+  .stat .val { color: var(--honey-light); }
+
+  #wave-info {
+    font-family: 'Fredoka One', cursive;
+    font-size: 16px;
+    color: var(--honey-light);
+    background: var(--ui-panel);
+    border: 2px solid var(--ui-border);
+    border-radius: 20px;
+    padding: 4px 14px;
+  }
+
+  /* MAIN LAYOUT */
+  #main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  /* GAME CANVAS AREA */
+  #game-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #3A7A3A;
+  }
+
+  #game-canvas {
+    display: block;
+    image-rendering: pixelated;
+  }
+
+  /* SIDEBAR */
+  #sidebar {
+    width: 200px;
+    background: var(--ui-bg);
+    border-left: 3px solid var(--ui-border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .sidebar-section {
+    padding: 8px;
+    border-bottom: 2px solid var(--ui-border);
+  }
+
+  .sidebar-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 13px;
+    color: var(--honey);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* TEDDY CARDS */
+  .teddy-card {
+    background: var(--ui-panel);
+    border: 2px solid var(--ui-border);
+    border-radius: 10px;
+    padding: 6px 8px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .teddy-card:hover { border-color: var(--honey); transform: translateX(2px); }
+  .teddy-card.selected { border-color: var(--honey-light); background: #7A4A28; box-shadow: 0 0 10px rgba(244,164,37,0.4); }
+  .teddy-card.locked { opacity: 0.4; cursor: not-allowed; }
+
+  .teddy-card .emoji { font-size: 22px; width: 28px; text-align: center; }
+
+  .teddy-card .info { flex: 1; min-width: 0; }
+  .teddy-card .name { font-weight: 800; font-size: 11px; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .teddy-card .cost { font-size: 10px; color: var(--honey); font-weight: 700; }
+
+  .tier-badge {
+    position: absolute;
+    top: 2px; right: 4px;
+    font-size: 8px;
+    color: var(--honey-light);
+    font-weight: 800;
+    opacity: 0.7;
+  }
+
+  /* BOTTOM BAR */
+  #bottom-bar {
+    background: var(--ui-bg);
+    border-top: 3px solid var(--ui-border);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .btn {
+    font-family: 'Fredoka One', cursive;
+    font-size: 15px;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.3);
+  }
+
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 rgba(0,0,0,0.3); }
+
+  .btn-green { background: var(--forest); color: white; }
+  .btn-green:hover { background: var(--forest-light); }
+  .btn-red { background: var(--rose); color: white; }
+  .btn-honey { background: var(--honey); color: var(--ui-bg); }
+  .btn-honey:hover { background: var(--honey-light); }
+  .btn-gray { background: #555; color: white; }
+
+  /* SELECTED TEDDY INFO */
+  #selected-info {
+    background: var(--ui-panel);
+    border: 2px solid var(--ui-border);
+    border-radius: 10px;
+    padding: 6px 12px;
+    min-width: 200px;
+    font-size: 12px;
+  }
+
+  #selected-info .sel-name { font-family: 'Fredoka One', cursive; font-size: 14px; color: var(--honey); }
+  #selected-info .sel-desc { color: #CCC; margin-top: 2px; font-size: 11px; }
+
+  /* OVERLAY */
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(4px);
+  }
+
+  #overlay.hidden { display: none; }
+
+  .overlay-box {
+    background: var(--ui-bg);
+    border: 4px solid var(--ui-border);
+    border-radius: 20px;
+    padding: 32px 40px;
+    text-align: center;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  }
+
+  .overlay-box h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 36px;
+    color: var(--honey);
+    text-shadow: 2px 2px 0 var(--warm-brown);
+    margin-bottom: 12px;
+  }
+
+  .overlay-box p { color: #DDD; margin-bottom: 20px; font-size: 15px; line-height: 1.6; }
+
+  .map-select {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  .map-btn {
+    background: var(--ui-panel);
+    border: 2px solid var(--ui-border);
+    border-radius: 12px;
+    padding: 14px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    color: var(--cream);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+  }
+
+  .map-btn:hover { border-color: var(--honey); background: var(--warm-brown); }
+  .map-btn.selected { border-color: var(--honey-light); background: #7A4A28; }
+  .map-btn .map-icon { font-size: 28px; display: block; margin-bottom: 4px; }
+
+  /* FLOATING NOTIFICATION */
+  #notif {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(244,164,37,0.9);
+    color: var(--ui-bg);
+    font-family: 'Fredoka One', cursive;
+    font-size: 16px;
+    padding: 6px 20px;
+    border-radius: 20px;
+    pointer-events: none;
+    transition: opacity 0.5s;
+    z-index: 50;
+    white-space: nowrap;
+  }
+
+  #notif.hidden { opacity: 0; }
+
+  /* WAVE PROGRESS */
+  #wave-bar {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.6);
+    border: 2px solid var(--ui-border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 13px;
+    color: var(--honey-light);
+    pointer-events: none;
+  }
+
+  /* HP BAR */
+  .hp-bar-container {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 4px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
+  .hp-bar { height: 100%; background: #4CAF50; border-radius: 2px; transition: width 0.2s; }
+
+  /* SCROLLBAR */
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-track { background: var(--ui-bg); }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--ui-border); border-radius: 2px; }
+
+  /* SPEED INDICATOR */
+  #speed-btn {
+    font-family: 'Fredoka One', cursive;
+    font-size: 14px;
+    background: var(--ui-panel);
+    border: 2px solid var(--ui-border);
+    border-radius: 15px;
+    color: var(--honey);
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  #speed-btn:hover { border-color: var(--honey); }
+
+  .lives-low { color: var(--rose) !important; animation: pulse 1s infinite; }
+
+  @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.5 } }
+
+  #sell-btn {
+    display: none;
+    font-size: 11px;
+    padding: 4px 10px;
+    margin-top: 4px;
+    width: 100%;
+  }
+
+  .upgrade-section { margin-top: 6px; }
+  .upgrade-btn {
+    display: block;
+    width: 100%;
+    font-size: 11px;
+    padding: 4px 10px;
+    margin-bottom: 3px;
+    background: var(--forest);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    transition: all 0.15s;
+  }
+  .upgrade-btn:hover { background: var(--forest-light); }
+  .upgrade-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* BOSS HP BAR */
+  #boss-bar {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 340px;
+    background: rgba(0,0,0,0.8);
+    border: 3px solid #FF4444;
+    border-radius: 14px;
+    padding: 6px 12px;
+    z-index: 40;
+    pointer-events: none;
+    display: none;
+    box-shadow: 0 0 20px rgba(255,68,68,0.6);
+  }
+  #boss-bar.visible { display: block; }
+  #boss-bar .boss-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 14px;
+    color: #FF8888;
+    text-align: center;
+    margin-bottom: 4px;
+    text-shadow: 0 0 8px #FF4444;
+  }
+  #boss-hp-track {
+    width: 100%;
+    height: 14px;
+    background: #330000;
+    border-radius: 7px;
+    overflow: hidden;
+    position: relative;
+  }
+  #boss-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FF2222, #FF6644);
+    border-radius: 7px;
+    transition: width 0.1s;
+    position: relative;
+  }
+  #boss-hp-fill::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 4px; right: 4px;
+    height: 4px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 2px;
+  }
+  #boss-hp-text {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: #FFB0B0;
+    margin-top: 2px;
+  }
+
+  /* ENDLESS MODE BADGE */
+  #endless-badge {
+    display: none;
+    background: linear-gradient(135deg, #9B7EC8, #E8636A);
+    border: 2px solid #FEDD8B;
+    border-radius: 14px;
+    padding: 3px 10px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 13px;
+    color: white;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+    animation: endlessPulse 2s ease-in-out infinite;
+  }
+  #endless-badge.visible { display: inline-block; }
+  @keyframes endlessPulse { 0%,100%{box-shadow:0 0 6px rgba(155,126,200,0.5)} 50%{box-shadow:0 0 18px rgba(155,126,200,0.9)} }
+
+  /* BOSS WARNING FLASH */
+  @keyframes bossFlash {
+    0%,100% { opacity: 0; }
+    10%,30%,50%,70%,90% { opacity: 1; }
+    20%,40%,60%,80% { opacity: 0; }
+  }
+  #boss-warning {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,0,0,0.18);
+    pointer-events: none;
+    display: none;
+    z-index: 30;
+    border: 4px solid rgba(255,0,0,0.6);
+    animation: bossFlash 1.2s ease-in-out;
+  }
+  #floats {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 25;
+    overflow: hidden;
+  }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <h1>🧸 Teddy Defense</h1>
+  <div class="stat-group">
+    <div class="stat"><span class="icon">🏰</span><span>Lives:</span><span class="val" id="lives-val">20</span></div>
+    <div class="stat"><span class="icon">🪄</span><span>Fluff:</span><span class="val" id="fluff-val">150</span></div>
+    <div class="stat"><span class="icon">💀</span><span>Kills:</span><span class="val" id="kills-val">0</span></div>
+    <div id="wave-info">Wave <span id="wave-num">0</span></div>
+    <span id="endless-badge">♾️ ENDLESS</span>
+    <span id="diff-badge" style="display:none"></span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button id="speed-btn" onclick="toggleSpeed()">⚡ 1x</button>
+    <button class="btn btn-honey" id="wave-btn" onclick="startWave()">▶ Start Wave</button>
+  </div>
+</div>
+
+<div id="main">
+  <div id="game-area">
+    <canvas id="game-canvas"></canvas>
+    <div id="notif" class="hidden">Message</div>
+    <div id="wave-bar" class="hidden">Wave in progress...</div>
+    <div id="boss-bar">
+      <div class="boss-name" id="boss-bar-name">👹 ANT OVERLORD</div>
+      <div id="boss-hp-track"><div id="boss-hp-fill" style="width:100%"></div></div>
+      <div id="boss-hp-text">??? / ???</div>
+    </div>
+    <div id="boss-warning"></div>
+    <div id="floats"></div>
+  </div>
+
+  <div id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">⭐ Tier 1</div>
+      <div class="teddy-card" id="card-sentry" onclick="selectTeddy('sentry')">
+        <span class="emoji">🧸</span>
+        <div class="info"><div class="name">Sentry Teddy</div><div class="cost">🪄 75</div></div>
+        <span class="tier-badge">T1</span>
+      </div>
+      <div class="teddy-card" id="card-honey" onclick="selectTeddy('honey')">
+        <span class="emoji">🍯</span>
+        <div class="info"><div class="name">Honey Bear</div><div class="cost">🪄 90</div></div>
+        <span class="tier-badge">T1</span>
+      </div>
+      <div class="teddy-card" id="card-scout" onclick="selectTeddy('scout')">
+        <span class="emoji">👀</span>
+        <div class="info"><div class="name">Scout Teddy</div><div class="cost">🪄 60</div></div>
+        <span class="tier-badge">T1</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">⚔️ Tier 2</div>
+      <div class="teddy-card" id="card-warrior" onclick="selectTeddy('warrior')">
+        <span class="emoji">⚔️</span>
+        <div class="info"><div class="name">Warrior Teddy</div><div class="cost">🪄 150</div></div>
+        <span class="tier-badge">T2</span>
+      </div>
+      <div class="teddy-card" id="card-medic" onclick="selectTeddy('medic')">
+        <span class="emoji">💊</span>
+        <div class="info"><div class="name">Medic Teddy</div><div class="cost">🪄 130</div></div>
+        <span class="tier-badge">T2</span>
+      </div>
+      <div class="teddy-card" id="card-engineer" onclick="selectTeddy('engineer')">
+        <span class="emoji">🔧</span>
+        <div class="info"><div class="name">Engineer Teddy</div><div class="cost">🪄 120</div></div>
+        <span class="tier-badge">T2</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-inner">
+        <div class="sidebar-title">🎯 Tier 3</div>
+        <div class="teddy-card" id="card-sniper" onclick="selectTeddy('sniper')">
+          <span class="emoji">🎯</span>
+          <div class="info"><div class="name">Sniper Teddy</div><div class="cost">🪄 250</div></div>
+          <span class="tier-badge">T3</span>
+        </div>
+        <div class="teddy-card" id="card-bomber" onclick="selectTeddy('bomber')">
+          <span class="emoji">💣</span>
+          <div class="info"><div class="name">Bomber Teddy</div><div class="cost">🪄 220</div></div>
+          <span class="tier-badge">T3</span>
+        </div>
+        <div class="teddy-card" id="card-shield" onclick="selectTeddy('shield')">
+          <span class="emoji">🛡️</span>
+          <div class="info"><div class="name">Shield Teddy</div><div class="cost">🪄 200</div></div>
+          <span class="tier-badge">T3</span>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">👑 Special</div>
+      <div class="teddy-card" id="card-king" onclick="selectTeddy('king')">
+        <span class="emoji">👑</span>
+        <div class="info"><div class="name">King Teddy</div><div class="cost">🪄 400</div></div>
+        <span class="tier-badge">SP</span>
+      </div>
+      <div class="teddy-card" id="card-ninja" onclick="selectTeddy('ninja')">
+        <span class="emoji">🥷</span>
+        <div class="info"><div class="name">Ninja Teddy</div><div class="cost">🪄 350</div></div>
+        <span class="tier-badge">SP</span>
+      </div>
+      <div class="teddy-card" id="card-mecha" onclick="selectTeddy('mecha')">
+        <span class="emoji">🤖</span>
+        <div class="info"><div class="name">Mecha Teddy</div><div class="cost">🪄 600</div></div>
+        <span class="tier-badge">SP</span>
+      </div>
+    </div>
+    <div class="sidebar-section" id="sel-panel" style="display:none">
+      <div class="sidebar-title">🔍 Selected</div>
+      <div id="selected-info">
+        <div class="sel-name" id="sel-name">-</div>
+        <div class="sel-desc" id="sel-desc">-</div>
+        <div class="upgrade-section" id="upgrade-section"></div>
+        <button class="btn btn-red" id="sell-btn" onclick="sellSelected()">💰 Sell</button>
+      </div>
+    </div>
+    <!-- MINIMAP -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">🗺️ Minimap</div>
+      <canvas id="minimap" width="184" height="80" style="border-radius:6px;border:1px solid var(--ui-border);display:block;cursor:pointer" title="Click to toggle placement helper"></canvas>
+    </div>
+    <!-- WAVE STATS -->
+    <div class="sidebar-section" id="wave-stats-panel">
+      <div class="sidebar-title">📊 Stats</div>
+      <div style="font-size:10px;color:#bbb;line-height:1.9">
+        <div>🧸 Teddies: <span id="stat-teddies" style="color:var(--honey-light);font-weight:800">0</span></div>
+        <div>💀 Total Kills: <span id="stat-kills" style="color:var(--honey-light);font-weight:800">0</span></div>
+        <div>👹 Bosses: <span id="stat-bosses" style="color:var(--honey-light);font-weight:800">0</span></div>
+        <div>🐜 On Field: <span id="stat-ants" style="color:var(--honey-light);font-weight:800">0</span></div>
+        <div>⏱️ Next boss: <span id="stat-nextboss" style="color:var(--honey-light);font-weight:800">Wave 15</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="bottom-bar">
+  <div style="font-size:11px;color:#aaa;max-width:260px;line-height:1.5">
+    Click grid to place • Click teddy to select • Right-click to deselect
+  </div>
+  <div id="selected-info-bottom" style="display:flex;align-items:center;gap:10px">
+    <span id="placing-info" style="font-family:'Fredoka One',cursive;font-size:14px;color:var(--honey)"></span>
+    <!-- WAVE COUNTDOWN -->
+    <div id="wave-countdown" style="display:none;font-family:'Fredoka One',cursive;font-size:13px;color:var(--honey-light);background:var(--ui-panel);border:2px solid var(--ui-border);border-radius:14px;padding:4px 12px">
+      ⏱️ Next wave in <span id="countdown-val">10</span>s
+    </div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-gray" id="auto-wave-btn" onclick="toggleAutoWave()" title="Auto-start next wave">🔄 Manual</button>
+    <button class="btn btn-gray" onclick="showMenu()">🗺️ Menu</button>
+  </div>
+</div>
+
+<!-- OVERLAY -->
+<div id="overlay">
+  <div class="overlay-box">
+    <h2>🧸 Teddy Defense</h2>
+    <p>Protect your teddy base from ant invasions!<br>Place defenders on green tiles to stop the ants.</p>
+    <div class="map-select">
+      <div class="map-btn selected" id="map-btn-0" onclick="selectMap(0)">
+        <span class="map-icon">🧺</span>Picnic Grounds
+      </div>
+      <div class="map-btn" id="map-btn-1" onclick="selectMap(1)">
+        <span class="map-icon">🏭</span>Honey Factory
+      </div>
+      <div class="map-btn" id="map-btn-2" onclick="selectMap(2)">
+        <span class="map-icon">🌳</span>Treehouse
+      </div>
+    </div>
+    <div style="margin:10px 0 16px">
+      <div style="font-family:'Fredoka One',cursive;font-size:13px;color:var(--honey);margin-bottom:8px;letter-spacing:1px">⚔️ DIFFICULTY</div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <div class="diff-btn selected" id="diff-easy" onclick="selectDiff('easy')" style="background:#4A7C59;border:2px solid #6BAE7C;border-radius:12px;padding:8px 16px;cursor:pointer;font-family:'Fredoka One',cursive;font-size:13px;color:white;transition:all .15s">🌼 Easy</div>
+        <div class="diff-btn" id="diff-normal" onclick="selectDiff('normal')" style="background:#5C3820;border:2px solid var(--ui-border);border-radius:12px;padding:8px 16px;cursor:pointer;font-family:'Fredoka One',cursive;font-size:13px;color:white;transition:all .15s">🧸 Normal</div>
+        <div class="diff-btn" id="diff-hard" onclick="selectDiff('hard')" style="background:#5C3820;border:2px solid var(--ui-border);border-radius:12px;padding:8px 16px;cursor:pointer;font-family:'Fredoka One',cursive;font-size:13px;color:white;transition:all .15s">🔥 Hard</div>
+      </div>
+      <div id="diff-desc" style="font-size:11px;color:#AAA;margin-top:6px">More starting fluff, ants deal less damage</div>
+    </div>
+    <button class="btn btn-honey" style="font-size:18px;padding:12px 32px" onclick="startGame()">🎮 Play!</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// GAME DATA
+// ============================================================
+const TEDDY_TYPES = {
+  sentry:   { name:'Sentry Teddy',   emoji:'🧸', cost:75,  damage:15, range:3.5, rate:1.2,  splash:0, slow:0,   desc:'Steady shooter, reliable damage', tier:1, color:'#8B5E3C' },
+  honey:    { name:'Honey Bear',     emoji:'🍯', cost:90,  damage:10, range:3,   rate:1.0,  splash:0, slow:0.4, desc:'Slows enemies with sticky honey',  tier:1, color:'#F4A425' },
+  scout:    { name:'Scout Teddy',    emoji:'👀', cost:60,  damage:8,  range:5.5, rate:0.8,  splash:0, slow:0,   desc:'Long range, reveals hidden foes',  tier:1, color:'#87CEEB' },
+  warrior:  { name:'Warrior Teddy', emoji:'⚔️', cost:150, damage:40, range:1.5, rate:0.9,  splash:0, slow:0,   desc:'High damage, short range brawler', tier:2, color:'#E8636A' },
+  medic:    { name:'Medic Teddy',   emoji:'💊', cost:130, damage:0,  range:2.5, rate:0,    splash:0, slow:0,   desc:'Heals stunned teddies nearby',     tier:2, color:'#5BB8A0', healer:true },
+  engineer: { name:'Engineer Teddy',emoji:'🔧', cost:120, damage:12, range:2.5, rate:1.1,  splash:0, slow:0,   desc:'Boosts nearby teddies +20% dmg',   tier:2, color:'#9B7EC8', booster:true },
+  sniper:   { name:'Sniper Teddy',  emoji:'🎯', cost:250, damage:80, range:7,   rate:0.4,  splash:0, slow:0,   desc:'Massive range, powerful but slow', tier:3, color:'#4A7C59' },
+  bomber:   { name:'Bomber Teddy',  emoji:'💣', cost:220, damage:35, range:3,   rate:0.7,  splash:1.5,slow:0,  desc:'Area damage, great vs groups',     tier:3, color:'#E8636A' },
+  shield:   { name:'Shield Teddy',  emoji:'🛡️', cost:200, damage:0,  range:2.5, rate:0,    splash:0, slow:0,   desc:'Protects nearby teddies from stun',tier:3, color:'#87CEEB', shielder:true },
+  king:     { name:'King Teddy',    emoji:'👑', cost:400, damage:20, range:3,   rate:1.0,  splash:0, slow:0,   desc:'Boosts ALL nearby teddies stats',  tier:4, color:'#F4A425', king:true },
+  ninja:    { name:'Ninja Teddy',   emoji:'🥷', cost:350, damage:60, range:4,   rate:1.5,  splash:0, slow:0,   desc:'Invisible, backstab, teleports',   tier:4, color:'#555' },
+  mecha:    { name:'Mecha Teddy',   emoji:'🤖', cost:600, damage:100,range:4,   rate:1.2,  splash:1, slow:0.2, desc:'Ultra-powerful multi-weapon titan', tier:4, color:'#9B7EC8' },
+};
+
+// MAP DEFINITIONS - paths as grid coords [col, row]
+const MAPS = [
+  {
+    name: 'Picnic Grounds', icon: '🧺', idx: 0,
+    cols: 22, rows: 16,
+    path: [
+      [0,3],[1,3],[2,3],[3,3],[4,3],[4,4],[4,5],[4,6],[4,7],
+      [5,7],[6,7],[7,7],[8,7],[9,7],[9,6],[9,5],[9,4],[9,3],
+      [10,3],[11,3],[12,3],[13,3],[13,4],[13,5],[13,6],[13,7],[13,8],[13,9],
+      [14,9],[15,9],[16,9],[16,8],[16,7],[16,6],[16,5],[16,4],[16,3],
+      [17,3],[18,3],[19,3],[20,3],[21,3]
+    ],
+    basePos: [21, 3],
+    startPos: [0, 3],
+    bg: '#7DBF6E'
+  },
+  {
+    name: 'Honey Factory', icon: '🏭', idx: 1,
+    cols: 22, rows: 16,
+    path: [
+      [0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[8,2],[8,3],[8,4],[8,5],[8,6],[8,7],[8,8],
+      [9,8],[10,8],[11,8],[11,7],[11,6],[11,5],[11,4],[11,3],[11,2],[11,1],[12,1],[13,1],
+      [14,1],[15,1],[15,2],[15,3],[15,4],[15,5],[15,6],[15,7],[15,8],[15,9],[15,10],
+      [16,10],[17,10],[18,10],[19,10],[20,10],[21,10]
+    ],
+    basePos: [21, 10],
+    startPos: [0, 1],
+    bg: '#8B7355'
+  },
+  {
+    name: 'Treehouse', icon: '🌳', idx: 2,
+    cols: 22, rows: 16,
+    path: [
+      [0,7],[1,7],[2,7],[3,7],[3,6],[3,5],[3,4],[3,3],[3,2],
+      [4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[9,3],[9,4],[9,5],[9,6],[9,7],[9,8],[9,9],
+      [10,9],[11,9],[12,9],[12,8],[12,7],[12,6],[12,5],[12,4],[12,3],[12,2],[13,2],
+      [14,2],[15,2],[16,2],[17,2],[18,2],[18,3],[18,4],[18,5],[18,6],[18,7],[18,8],[18,9],[18,10],[18,11],
+      [19,11],[20,11],[21,11]
+    ],
+    basePos: [21, 11],
+    startPos: [0, 7],
+    bg: '#4A7C59'
+  }
+];
+
+// ============================================================
+// BOSS DEFINITIONS
+// ============================================================
+const BOSS_DEFS = [
+  // Wave 15 boss
+  { name:'👹 Ant Overlord',      emoji:'👹', baseHp:2000, speed:0.55, stunImmune:false, color:'#8B0000',
+    size:1.8, reward:500, splashStun:true,
+    desc:'The dreaded Ant Overlord! Stuns nearby teddies as it lumbers past.' },
+  { name:'🔥 Fire Queen',         emoji:'🔥', baseHp:2500, speed:0.75, stunImmune:false, color:'#FF4400',
+    size:1.6, reward:600, splashStun:false,
+    desc:'Blazing speed! Burns through your defenses before you can react.' },
+  { name:'💀 Skeleton General',   emoji:'💀', baseHp:3200, speed:0.5,  stunImmune:true,  color:'#CCCCCC',
+    size:1.9, reward:700, splashStun:false,
+    desc:'Completely stun-immune. The undead cannot be stopped by Red Ants.' },
+  { name:'🌪️ Storm Empress',      emoji:'🌪️', baseHp:3500, speed:0.92, stunImmune:false, color:'#5599FF',
+    size:1.5, reward:800, splashStun:true,
+    desc:'Blazing fast with area-of-effect stun that hits teddies as it passes.' },
+  { name:'👾 Mecha Ant',          emoji:'👾', baseHp:5000, speed:0.6,  stunImmune:true,  color:'#9B7EC8',
+    size:2.1, reward:1000, splashStun:false,
+    desc:'Armored Mecha Ant — stun-immune and absurdly tanky. Bring your heaviest firepower.' },
+  { name:'🌑 Shadow Empress',     emoji:'🌑', baseHp:4000, speed:0.8,  stunImmune:false, color:'#330044',
+    size:1.7, reward:900, splashStun:true,
+    desc:'Emerges from darkness with wide stun pulses. Slows all teddies near the path.' },
+  { name:'❄️ Ice Titan',          emoji:'❄️', baseHp:6000, speed:0.45, stunImmune:true,  color:'#AADDFF',
+    size:2.2, reward:1200, splashStun:false,
+    desc:'Glacially slow but immune to stun and carries enormous HP. A true wall of ice.' },
+  { name:'☄️ Comet Lord',         emoji:'☄️', baseHp:4500, speed:1.1,  stunImmune:false, color:'#FF8833',
+    size:1.6, reward:1100, splashStun:true,
+    desc:'Fastest boss yet! Streaks across the field leaving stun blasts in its wake.' },
+];
+
+// ============================================================
+// DIFFICULTY SETTINGS
+// ============================================================
+const DIFFICULTY = {
+  easy:   { label:'🌼 Easy',   startFluff:250, startLives:25, antHpMult:0.7,  antSpeedMult:0.85, rewardMult:1.2,  color:'#4A7C59', desc:'More starting fluff, ants deal less damage' },
+  normal: { label:'🧸 Normal', startFluff:150, startLives:20, antHpMult:1.0,  antSpeedMult:1.0,  rewardMult:1.0,  color:'#C8864E', desc:'The classic Teddy Defense experience' },
+  hard:   { label:'🔥 Hard',   startFluff:100, startLives:15, antHpMult:1.4,  antSpeedMult:1.2,  rewardMult:0.85, color:'#E8636A', desc:'Tougher ants, less fluff, fewer lives — good luck!' },
+};
+
+// ============================================================
+// ACHIEVEMENTS
+// ============================================================
+const ACHIEVEMENTS = [
+  { id:'wave5',    check: s => s.wave >= 5,             name:'Getting Started',      desc:'Survive 5 waves',              icon:'🌱' },
+  { id:'wave10',   check: s => s.wave >= 10,            name:'Halfway There',        desc:'Survive 10 waves',             icon:'🔟' },
+  { id:'wave25',   check: s => s.wave >= 25,            name:'Endless Warrior',      desc:'Reach wave 25 in Endless',     icon:'⚔️' },
+  { id:'wave50',   check: s => s.wave >= 50,            name:'Unstoppable',          desc:'Reach wave 50!',               icon:'💪' },
+  { id:'wave100',  check: s => s.wave >= 100,           name:'Centurion',            desc:'Survive 100 waves!',           icon:'💯' },
+  { id:'boss1',    check: s => s.bossCount >= 1,        name:'Boss Slayer',          desc:'Defeat your first boss',       icon:'👹' },
+  { id:'boss5',    check: s => s.bossCount >= 5,        name:'Boss Hunter',          desc:'Defeat 5 bosses',              icon:'🏹' },
+  { id:'boss10',   check: s => s.bossCount >= 10,       name:'Boss Destroyer',       desc:'Defeat 10 bosses!',            icon:'💀' },
+  { id:'kills100', check: s => s.totalKills >= 100,     name:'Exterminator',         desc:'Kill 100 ants',                icon:'🐜' },
+  { id:'kills500', check: s => s.totalKills >= 500,     name:'Ant Apocalypse',       desc:'Kill 500 ants',                icon:'💥' },
+  { id:'kills1k',  check: s => s.totalKills >= 1000,    name:'Ant Armageddon',       desc:'Kill 1000 ants',               icon:'☠️' },
+  { id:'rich',     check: s => s.fluff >= 1000,         name:'Honey Baron',          desc:'Accumulate 1000 Fluff at once',icon:'💰' },
+  { id:'max',      check: s => s.teddies.some(t => t.level >= 3), name:'Fully Upgraded', desc:'Upgrade a teddy to max level', icon:'⬆️' },
+];
+const unlockedAchievements = new Set();
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let state = {
+  lives: 20,
+  fluff: 150,
+  wave: 0,
+  selectedType: null,
+  selectedPlaced: null,
+  teddies: [],
+  ants: [],
+  bullets: [],
+  particles: [],
+  waveActive: false,
+  antsToSpawn: 0,
+  spawnTimer: 0,
+  spawnQueue: [],
+  gameOver: false,
+  won: false,
+  speed: 1,
+  mapIdx: 0,
+  map: MAPS[0],
+  gridW: 0,
+  gridH: 0,
+  nextId: 1,
+  pathSet: new Set(),
+  endlessMode: false,
+  bossCount: 0,
+  activeBoss: null,
+  difficulty: 'easy',
+  totalKills: 0,
+  score: 0,
+};
+
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+let cellSize = 42;
+let lastTime = 0;
+let animId;
+
+// ============================================================
+// RESIZE
+// ============================================================
+function resizeCanvas() {
+  const area = document.getElementById('game-area');
+  const w = area.clientWidth;
+  const h = area.clientHeight;
+  const map = state.map;
+  const cw = Math.floor(w / map.cols);
+  const ch = Math.floor(h / map.rows);
+  cellSize = Math.min(cw, ch, 48);
+  canvas.width = map.cols * cellSize;
+  canvas.height = map.rows * cellSize;
+}
+
+// ============================================================
+// MAP SETUP
+// ============================================================
+function setupMap() {
+  const map = state.map;
+  state.pathSet = new Set(map.path.map(p => p[0]+','+p[1]));
+  resizeCanvas();
+}
+
+// ============================================================
+// WAVE GENERATION
+// ============================================================
+function isBossWave(waveNum) {
+  if (waveNum === 15) return true;
+  if (state.endlessMode && waveNum > 15 && (waveNum % 50 === 0)) return true;
+  return false;
+}
+
+function getBossDef(waveNum) {
+  if (waveNum === 15) return BOSS_DEFS[0];
+  // Endless bosses cycle through defs 1-4, scaling with boss number
+  const bossIdx = 1 + ((state.bossCount) % (BOSS_DEFS.length - 1));
+  return BOSS_DEFS[bossIdx];
+}
+
+function buildWave(waveNum) {
+  const diff = DIFFICULTY[state.difficulty];
+  const base = 8 + waveNum * 4;
+  const redChance = Math.min(0.05 + waveNum * 0.04, 0.5);
+  const queue = [];
+
+  if (isBossWave(waveNum)) {
+    const escortCount = Math.min(6 + waveNum, 20);
+    for (let i = 0; i < escortCount; i++) {
+      const speedMult = diff.antSpeedMult * (1 + (waveNum - 1) * 0.06);
+      const hpMult = diff.antHpMult * (1 + (waveNum - 1) * 0.12);
+      queue.push({
+        type: Math.random() < 0.5 ? 'red' : 'regular',
+        hp: Math.floor(50 * hpMult), maxHp: Math.floor(50 * hpMult),
+        speed: 1.0 * speedMult, isBoss: false,
+      });
+    }
+    const bdef = getBossDef(waveNum);
+    const bossHpScale = diff.antHpMult * (1 + Math.max(0, state.bossCount) * 0.6);
+    const bossHp = Math.floor(bdef.baseHp * bossHpScale);
+    queue.push({
+      type: 'boss', bossDefIdx: BOSS_DEFS.indexOf(bdef),
+      hp: bossHp, maxHp: bossHp,
+      speed: bdef.speed * diff.antSpeedMult * (1 + state.bossCount * 0.05),
+      isBoss: true,
+    });
+  } else {
+    for (let i = 0; i < base; i++) {
+      const isRed = Math.random() < redChance;
+      const speedMult = diff.antSpeedMult * (1 + (waveNum - 1) * 0.08);
+      const hpMult = diff.antHpMult * (1 + (waveNum - 1) * 0.15);
+      queue.push({
+        type: isRed ? 'red' : 'regular',
+        hp: Math.floor((isRed ? 60 : 40) * hpMult),
+        maxHp: Math.floor((isRed ? 60 : 40) * hpMult),
+        speed: (isRed ? 0.85 : 1.0) * speedMult,
+        isBoss: false,
+      });
+    }
+  }
+  return queue;
+}
+
+// ============================================================
+// GAME LOOP
+// ============================================================
+function gameLoop(ts) {
+  const dt = Math.min((ts - lastTime) / 1000, 0.05) * state.speed;
+  lastTime = ts;
+
+  if (!state.gameOver) {
+    update(dt);
+  }
+  render();
+  animId = requestAnimationFrame(gameLoop);
+}
+
+function update(dt) {
+  spawnAnts(dt);
+  moveAnts(dt);
+  checkRedAntStuns();
+  teddyAI(dt);
+  moveBullets(dt);
+  updateParticles(dt);
+  updateMedics(dt);
+  checkWaveEnd();
+  updateCountdown(dt);
+  updateStatsPanel();
+  renderMinimap();
+}
+
+function checkRedAntStuns() {
+  // Build shield coverage zones
+  const shieldedTeddies = new Set();
+  for (const t of state.teddies) {
+    if (TEDDY_TYPES[t.type].shielder && !t.stunned) {
+      const range = TEDDY_TYPES[t.type].range * cellSize;
+      for (const other of state.teddies) {
+        if (other === t) continue;
+        const dx = other.px - t.px, dy = other.py - t.py;
+        if (Math.sqrt(dx*dx+dy*dy) <= range) shieldedTeddies.add(other.id);
+      }
+    }
+  }
+
+  for (const ant of state.ants) {
+    if (ant.dead || ant.type !== 'red') continue;
+    for (const t of state.teddies) {
+      if (t.stunned || shieldedTeddies.has(t.id)) continue;
+      const dx = t.px - ant.x, dy = t.py - ant.y;
+      if (Math.sqrt(dx*dx+dy*dy) < cellSize * 0.9 && Math.random() < 0.005) {
+        t.stunned = true;
+        t.stunTimer = 5;
+        spawnParticles(t.px, t.py, '#8888FF', 6);
+      }
+    }
+  }
+}
+
+// ============================================================
+// SPAWN
+// ============================================================
+function spawnAnts(dt) {
+  if (!state.waveActive || state.spawnQueue.length === 0) return;
+  state.spawnTimer -= dt;
+  if (state.spawnTimer <= 0) {
+    const spec = state.spawnQueue.shift();
+    const map = state.map;
+    const path = map.path;
+
+    if (spec.isBoss) {
+      const bdef = BOSS_DEFS[spec.bossDefIdx];
+      // Show dramatic intro, then spawn after delay
+      showBossIntro(bdef, spec);
+      state.spawnTimer = 0;
+      return;
+    }
+
+    state.ants.push({
+      id: state.nextId++,
+      type: spec.type,
+      hp: spec.hp, maxHp: spec.maxHp,
+      speed: spec.speed,
+      pathIdx: 0,
+      x: path[0][0] * cellSize + cellSize / 2,
+      y: path[0][1] * cellSize + cellSize / 2,
+      slowTimer: 0, stunTimer: 0,
+      reached: false, dead: false, isBoss: false,
+    });
+    state.spawnTimer = state.spawnQueue.length > 0 ? 0.7 : 0;
+  }
+}
+
+function showBossIntro(bdef, spec) {
+  const intro = document.getElementById('boss-intro');
+  document.getElementById('boss-intro-emoji').textContent = bdef.emoji;
+  document.getElementById('boss-intro-name').textContent = bdef.name.replace(/^\S+\s/, ''); // strip emoji
+  document.getElementById('boss-intro-desc').textContent = bdef.desc;
+  const bossNum = state.bossCount + 1;
+  const hpScale = DIFFICULTY[state.difficulty].antHpMult * (1 + Math.max(0, state.bossCount) * 0.6);
+  document.getElementById('boss-intro-stats').innerHTML = `
+    <span>❤️ ${Math.floor(bdef.baseHp * hpScale).toLocaleString()} HP</span>
+    <span>⚡ Speed ${bdef.speed.toFixed(2)}</span>
+    <span>${bdef.stunImmune ? '🛡️ Stun Immune' : '⚡ Stunnable'}</span>
+    <span>💰 ${bdef.reward} Fluff</span>
+  `;
+  intro.style.display = 'flex';
+
+  // Pause wave while intro shows
+  state.waveActive = false;
+  setTimeout(() => {
+    intro.style.display = 'none';
+    state.waveActive = true;
+
+    // Flash warning
+    const warn = document.getElementById('boss-warning');
+    warn.style.display = 'block';
+    setTimeout(() => { warn.style.display = 'none'; }, 1200);
+
+    // Actually spawn the boss
+    const path = state.map.path;
+    const ant = {
+      id: state.nextId++,
+      type: 'boss',
+      bossDefIdx: spec.bossDefIdx,
+      hp: spec.hp, maxHp: spec.maxHp,
+      speed: spec.speed,
+      pathIdx: 0,
+      x: path[0][0] * cellSize + cellSize / 2,
+      y: path[0][1] * cellSize + cellSize / 2,
+      slowTimer: 0, stunTimer: 0,
+      reached: false, dead: false,
+      isBoss: true,
+      size: bdef.size, stunImmune: bdef.stunImmune,
+      color: bdef.color, emoji: bdef.emoji,
+      reward: bdef.reward, splashStun: bdef.splashStun,
+      bossName: bdef.name,
+    };
+    state.ants.push(ant);
+    state.activeBoss = ant.id;
+    document.getElementById('boss-bar').classList.add('visible');
+    document.getElementById('boss-bar-name').textContent = bdef.name;
+    updateBossBar(ant);
+    notify(`⚠️ ${bdef.name} appears!`);
+  }, 3500);
+}
+
+// ============================================================
+// MOVE ANTS
+// ============================================================
+function moveAnts(dt) {
+  const map = state.map;
+  const path = map.path;
+  for (const ant of state.ants) {
+    if (ant.dead || ant.reached) continue;
+    // Stun check - bosses with stunImmune ignore stun
+    if (ant.stunTimer > 0 && !ant.stunImmune) {
+      ant.stunTimer -= dt;
+      continue;
+    } else if (ant.stunTimer > 0) {
+      ant.stunTimer = 0; // immune, clear it
+    }
+    const slowMult = ant.slowTimer > 0 ? (ant.isBoss ? 0.75 : 0.4) : 1.0;
+    if (ant.slowTimer > 0) ant.slowTimer -= dt;
+
+    if (ant.pathIdx >= path.length - 1) {
+      ant.reached = true;
+      const dmgToBase = ant.isBoss ? 5 : 1;
+      state.lives = Math.max(0, state.lives - dmgToBase);
+      document.getElementById('lives-val').textContent = state.lives;
+      if (state.lives <= 3) document.getElementById('lives-val').classList.add('lives-low');
+      if (ant.isBoss) {
+        // Boss reaching base: stun all teddies
+        for (const t of state.teddies) {
+          if (!t.stunned) { t.stunned = true; t.stunTimer = 8; }
+        }
+        state.activeBoss = null;
+        document.getElementById('boss-bar').classList.remove('visible');
+        state.bossCount++;
+        notify('💥 BOSS reached the base! All teddies stunned! -5 lives!');
+      }
+      if (state.lives <= 0) triggerGameOver();
+      spawnParticles(ant.x, ant.y, '#E8636A', 10);
+      continue;
+    }
+
+    const target = path[ant.pathIdx + 1];
+    const tx = target[0] * cellSize + cellSize / 2;
+    const ty = target[1] * cellSize + cellSize / 2;
+    const dx = tx - ant.x;
+    const dy = ty - ant.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const step = ant.speed * cellSize * dt * slowMult;
+
+    if (dist <= step) {
+      ant.x = tx;
+      ant.y = ty;
+      ant.pathIdx++;
+
+      // Boss passing next to teddies: chance to splash-stun nearby
+      if (ant.isBoss && ant.splashStun) {
+        for (const t of state.teddies) {
+          const tdx = t.px - ant.x;
+          const tdy = t.py - ant.y;
+          if (Math.sqrt(tdx*tdx+tdy*tdy) < cellSize * 2.5 && Math.random() < 0.15) {
+            t.stunned = true;
+            t.stunTimer = 5;
+          }
+        }
+      }
+    } else {
+      ant.x += (dx / dist) * step;
+      ant.y += (dy / dist) * step;
+    }
+  }
+  state.ants = state.ants.filter(a => !a.reached && !a.dead);
+}
+
+// ============================================================
+// TEDDY AI
+// ============================================================
+function teddyAI(dt) {
+  for (const t of state.teddies) {
+    if (t.stunned) {
+      t.stunTimer -= dt;
+      if (t.stunTimer <= 0) t.stunned = false;
+      continue;
+    }
+
+    t.cooldown = Math.max(0, t.cooldown - dt);
+
+    const def = TEDDY_TYPES[t.type];
+    if (def.healer) { /* handled in updateMedics */ continue; }
+    if (def.shielder) continue;
+    if (def.booster || def.king) {
+      // apply boost to nearby
+      applyBoosts();
+      continue;
+    }
+
+    if (t.cooldown > 0) continue;
+
+    const range = def.range * cellSize * (1 + t.boostMult * 0.1);
+    let target = null;
+    let bestProgress = -1;
+
+    for (const ant of state.ants) {
+      if (ant.dead) continue;
+      const dx = ant.x - t.px;
+      const dy = ant.y - t.py;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d <= range && ant.pathIdx > bestProgress) {
+        bestProgress = ant.pathIdx;
+        target = ant;
+      }
+    }
+
+    if (target) {
+      fireBullet(t, target);
+      t.cooldown = 1 / (def.rate * (1 + t.boostMult * 0.15));
+      t.lastFired = Date.now();
+    }
+  }
+}
+
+function applyBoosts() {
+  // reset boosts
+  for (const t of state.teddies) t.boostMult = 0;
+  for (const booster of state.teddies) {
+    const def = TEDDY_TYPES[booster.type];
+    if (!def.booster && !def.king) continue;
+    const range = def.range * cellSize;
+    for (const t of state.teddies) {
+      if (t === booster) continue;
+      const dx = t.px - booster.px;
+      const dy = t.py - booster.py;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d <= range) t.boostMult = Math.max(t.boostMult, def.king ? 0.5 : 0.3);
+    }
+  }
+}
+
+// ============================================================
+// BULLETS
+// ============================================================
+function fireBullet(teddy, target) {
+  const def = TEDDY_TYPES[teddy.type];
+  state.bullets.push({
+    id: state.nextId++,
+    x: teddy.px,
+    y: teddy.py,
+    targetId: target.id,
+    damage: def.damage * (1 + teddy.boostMult * 0.2),
+    speed: 320,
+    splash: def.splash,
+    slow: def.slow,
+    color: def.color,
+    size: def.splash > 1 ? 8 : 5,
+    type: teddy.type,
+  });
+}
+
+function moveBullets(dt) {
+  for (const b of state.bullets) {
+    const ant = state.ants.find(a => a.id === b.targetId && !a.dead);
+    if (!ant) { b.done = true; continue; }
+    const dx = ant.x - b.x;
+    const dy = ant.y - b.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const step = b.speed * dt;
+
+    if (dist <= step + 5) {
+      // hit!
+      if (b.splash > 0) {
+        for (const a of state.ants) {
+          const adx = a.x - ant.x;
+          const ady = a.y - ant.y;
+          if (Math.sqrt(adx*adx + ady*ady) <= b.splash * cellSize) {
+            damageAnt(a, b.damage, b.slow);
+          }
+        }
+        spawnParticles(ant.x, ant.y, b.color, 12);
+      } else {
+        damageAnt(ant, b.damage, b.slow);
+      }
+      b.done = true;
+    } else {
+      b.x += (dx / dist) * step;
+      b.y += (dy / dist) * step;
+    }
+  }
+  state.bullets = state.bullets.filter(b => !b.done);
+}
+
+function damageAnt(ant, dmg, slow) {
+  ant.hp -= dmg;
+  if (slow > 0 && !ant.isBoss) ant.slowTimer = 2;
+  if (slow > 0 && ant.isBoss) ant.slowTimer = 0.5;
+
+  // Floating damage number
+  spawnFloatDmg(ant.x, ant.y, Math.floor(dmg), ant.isBoss ? '#FF8888' : (ant.type === 'red' ? '#FFB0B0' : '#FEDD8B'));
+
+  if (ant.hp <= 0) {
+    ant.dead = true;
+    const diff = DIFFICULTY[state.difficulty];
+    if (ant.isBoss) {
+      const reward = Math.floor(ant.reward * diff.rewardMult);
+      state.fluff += reward;
+      state.bossCount++;
+      state.totalKills++;
+      state.score += reward * 5;
+      state.activeBoss = null;
+      document.getElementById('boss-bar').classList.remove('visible');
+      document.getElementById('fluff-val').textContent = state.fluff;
+      document.getElementById('kills-val').textContent = state.totalKills;
+      spawnParticles(ant.x, ant.y, ant.color, 40);
+      spawnParticles(ant.x, ant.y, '#F4A425', 30);
+      notify(`👑 BOSS DEFEATED! +${reward} 🪄`);
+    } else {
+      const reward = Math.floor((ant.type === 'red' ? 8 : 5) * diff.rewardMult);
+      state.fluff += reward;
+      state.totalKills++;
+      state.score += ant.type === 'red' ? 15 : 10;
+      document.getElementById('fluff-val').textContent = state.fluff;
+      document.getElementById('kills-val').textContent = state.totalKills;
+      spawnParticles(ant.x, ant.y, ant.type === 'red' ? '#FF4444' : '#8B5E3C', 8);
+    }
+    checkAchievements();
+  } else if (ant.isBoss) {
+    updateBossBar(ant);
+  }
+}
+
+function spawnFloatDmg(x, y, dmg, color) {
+  const area = document.getElementById('game-area');
+  const rect = canvas.getBoundingClientRect();
+  const areaRect = area.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'float-dmg';
+  el.textContent = dmg >= 1000 ? (dmg/1000).toFixed(1)+'k' : dmg;
+  el.style.color = color;
+  el.style.fontSize = dmg > 50 ? '18px' : '13px';
+  const cx = canvas.offsetLeft + x;
+  const cy = canvas.offsetTop + y - 10;
+  el.style.left = (cx + (Math.random()-0.5)*20) + 'px';
+  el.style.top = cy + 'px';
+  document.getElementById('floats').appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+
+function checkAchievements() {
+  for (const ach of ACHIEVEMENTS) {
+    if (!unlockedAchievements.has(ach.id) && ach.check(state)) {
+      unlockedAchievements.add(ach.id);
+      showAchievement(ach);
+    }
+  }
+}
+
+function showAchievement(ach) {
+  const el = document.getElementById('achievement');
+  document.getElementById('achieve-name').textContent = ach.icon + ' ' + ach.name;
+  document.getElementById('achieve-desc').textContent = ach.desc;
+  el.style.display = 'block';
+  clearTimeout(showAchievement._t);
+  showAchievement._t = setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+function updateBossBar(boss) {
+  const pct = Math.max(0, boss.hp / boss.maxHp) * 100;
+  document.getElementById('boss-hp-fill').style.width = pct + '%';
+  document.getElementById('boss-hp-text').textContent =
+    Math.max(0, boss.hp).toLocaleString() + ' / ' + boss.maxHp.toLocaleString();
+}
+
+// ============================================================
+// MEDIC
+// ============================================================
+function updateMedics(dt) {
+  for (const t of state.teddies) {
+    if (TEDDY_TYPES[t.type].healer && !t.stunned) {
+      t.cooldown = Math.max(0, t.cooldown - dt);
+      if (t.cooldown > 0) continue;
+      const range = TEDDY_TYPES[t.type].range * cellSize;
+      for (const other of state.teddies) {
+        if (other === t || !other.stunned) continue;
+        const dx = other.px - t.px;
+        const dy = other.py - t.py;
+        if (Math.sqrt(dx*dx+dy*dy) <= range) {
+          other.stunned = false;
+          other.stunTimer = 0;
+          spawnParticles(other.px, other.py, '#5BB8A0', 8);
+          t.cooldown = 3;
+          break;
+        }
+      }
+    }
+  }
+}
+
+// ============================================================
+// PARTICLES
+// ============================================================
+function spawnParticles(x, y, color, count) {
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 30 + Math.random() * 80;
+    state.particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 0.5 + Math.random() * 0.3,
+      maxLife: 0.5 + Math.random() * 0.3,
+      color,
+      size: 2 + Math.random() * 3,
+    });
+  }
+}
+
+function updateParticles(dt) {
+  for (const p of state.particles) {
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vy += 80 * dt;
+    p.life -= dt;
+  }
+  state.particles = state.particles.filter(p => p.life > 0);
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawMap();
+  drawRangePreview();
+  drawTeddies();
+  drawBullets();
+  drawAnts();
+  drawParticles();
+  drawBase();
+}
+
+function drawMap() {
+  const map = state.map;
+  ctx.fillStyle = map.bg;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Decorative background tiles
+  for (let r = 0; r < map.rows; r++) {
+    for (let c = 0; c < map.cols; c++) {
+      const key = c+','+r;
+      const px = c * cellSize, py = r * cellSize;
+      if (state.pathSet.has(key)) {
+        // Path tile
+        ctx.fillStyle = '#C4975A';
+        ctx.fillRect(px, py, cellSize, cellSize);
+        ctx.fillStyle = '#B8845A';
+        ctx.fillRect(px+1, py+1, cellSize-2, cellSize-2);
+        // subtle path texture
+        ctx.fillStyle = 'rgba(0,0,0,0.06)';
+        if ((c + r) % 3 === 0) ctx.fillRect(px+4, py+4, cellSize-8, 2);
+      } else {
+        // Grass/background tiles with subtle variety
+        const seed = (c * 7 + r * 13) % 10;
+        if (map.idx === 1) {
+          // Factory — concrete floor
+          ctx.fillStyle = seed < 3 ? '#9A8060' : seed < 6 ? '#8B7355' : '#7A6345';
+        } else if (map.idx === 2) {
+          // Treehouse — rich forest
+          ctx.fillStyle = seed < 3 ? '#5A9E4A' : seed < 7 ? '#4A7C59' : '#3D6B4A';
+        } else {
+          // Picnic — grassland
+          ctx.fillStyle = seed < 3 ? '#8DCF7E' : seed < 7 ? '#7DBF6E' : '#6DAF5E';
+        }
+        ctx.fillRect(px, py, cellSize, cellSize);
+
+        // Decorative emojis on non-path, non-occupied tiles
+        const hasTeddy = state.teddies.some(t => t.col === c && t.row === r);
+        if (!hasTeddy && seed === 0 && cellSize >= 32) {
+          ctx.font = `${cellSize * 0.4}px serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.globalAlpha = 0.5;
+          const decos = map.idx === 0 ? ['🌸','🌼','🍀','🌿'] :
+                        map.idx === 1 ? ['⚙️','🔩','📦','🏗️'] :
+                                        ['🍄','🌿','🍃','🌱'];
+          ctx.fillText(decos[seed % decos.length], px+cellSize/2, py+cellSize/2);
+          ctx.globalAlpha = 1;
+        }
+
+        // Subtle grid
+        ctx.strokeStyle = 'rgba(0,0,0,0.07)';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(px, py, cellSize, cellSize);
+      }
+    }
+  }
+
+  // Path direction arrows
+  const path = map.path;
+  ctx.fillStyle = 'rgba(0,0,0,0.12)';
+  for (let i = 0; i < path.length - 1; i++) {
+    const cx = path[i][0] * cellSize + cellSize/2;
+    const cy = path[i][1] * cellSize + cellSize/2;
+    const nx = path[i+1][0] * cellSize + cellSize/2;
+    const ny = path[i+1][1] * cellSize + cellSize/2;
+    const angle = Math.atan2(ny-cy, nx-cx);
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(5, 0); ctx.lineTo(-4, -3.5); ctx.lineTo(-4, 3.5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Start marker
+  const sp = map.startPos;
+  ctx.font = `${cellSize*0.6}px serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🚩', sp[0]*cellSize+cellSize/2, sp[1]*cellSize+cellSize/2);
+}
+
+function drawBase() {
+  const map = state.map;
+  const bp = map.basePos;
+  ctx.font = `${cellSize*0.85}px serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🏰', bp[0]*cellSize+cellSize/2, bp[1]*cellSize+cellSize/2);
+}
+
+function drawRangePreview() {
+  if (!state.selectedType) return;
+  const def = TEDDY_TYPES[state.selectedType];
+  // hover cell
+  const mc = state.mouseCell;
+  if (!mc) return;
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 4]);
+  ctx.strokeRect(mc.c*cellSize+2, mc.r*cellSize+2, cellSize-4, cellSize-4);
+  ctx.setLineDash([]);
+
+  ctx.beginPath();
+  ctx.arc(mc.c*cellSize+cellSize/2, mc.r*cellSize+cellSize/2, def.range*cellSize, 0, Math.PI*2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  ctx.fill();
+}
+
+function drawTeddies() {
+  const now = Date.now();
+
+  // Draw shield ranges first (under everything)
+  for (const t of state.teddies) {
+    if (!TEDDY_TYPES[t.type].shielder || t.stunned) continue;
+    const def = TEDDY_TYPES[t.type];
+    const pulse = 0.5 + 0.3 * Math.sin(now / 600);
+    ctx.beginPath();
+    ctx.arc(t.px, t.py, def.range * cellSize, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(135,206,235,${pulse * 0.5})`;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = `rgba(135,206,235,${pulse * 0.06})`;
+    ctx.fill();
+  }
+
+  // Build shielded set for indicator
+  const shieldedTeddies = new Set();
+  for (const t of state.teddies) {
+    if (TEDDY_TYPES[t.type].shielder && !t.stunned) {
+      const range = TEDDY_TYPES[t.type].range * cellSize;
+      for (const other of state.teddies) {
+        if (other === t) continue;
+        const dx = other.px - t.px, dy = other.py - t.py;
+        if (Math.sqrt(dx*dx+dy*dy) <= range) shieldedTeddies.add(other.id);
+      }
+    }
+  }
+
+  for (const t of state.teddies) {
+    const x = t.px;
+    const y = t.py;
+    const cs = cellSize;
+
+    // show range if selected
+    if (state.selectedPlaced === t.id) {
+      const def = TEDDY_TYPES[t.type];
+      ctx.beginPath();
+      ctx.arc(x, y, def.range*cs, 0, Math.PI*2);
+      ctx.strokeStyle = 'rgba(255,220,100,0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,220,100,0.08)';
+      ctx.fill();
+
+      // selection ring
+      ctx.beginPath();
+      ctx.arc(x, y, cs*0.52, 0, Math.PI*2);
+      ctx.strokeStyle = '#FEDD8B';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // stun effect
+    if (t.stunned) {
+      ctx.beginPath();
+      ctx.arc(x, y, cs*0.5, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(100,100,255,0.3)';
+      ctx.fill();
+      const starAngle = now / 400;
+      for (let s = 0; s < 3; s++) {
+        const a = starAngle + s * Math.PI * 2 / 3;
+        const sx = x + Math.cos(a) * cs * 0.45;
+        const sy = y + Math.sin(a) * cs * 0.45 - 4;
+        ctx.font = '10px serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('⭐', sx, sy);
+      }
+    }
+
+    // shield indicator ring on protected teddies
+    if (shieldedTeddies.has(t.id) && !t.stunned) {
+      ctx.beginPath();
+      ctx.arc(x, y, cs * 0.48, 0, Math.PI*2);
+      ctx.strokeStyle = 'rgba(135,206,235,0.7)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // bg circle
+    const def = TEDDY_TYPES[t.type];
+    ctx.beginPath();
+    ctx.arc(x, y, cs * 0.42, 0, Math.PI * 2);
+    ctx.fillStyle = t.stunned ? '#334' : def.color + 'AA';
+    ctx.fill();
+
+    // emoji
+    ctx.font = `${cs * 0.6}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(def.emoji, x, y + 2);
+
+    // level badge
+    if (t.level > 1) {
+      ctx.beginPath();
+      ctx.arc(x + cs*0.32, y - cs*0.32, cs*0.18, 0, Math.PI*2);
+      ctx.fillStyle = '#F4A425';
+      ctx.fill();
+      ctx.fillStyle = '#3D2314';
+      ctx.font = `bold ${cs*0.2}px Nunito, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(t.level, x + cs*0.32, y - cs*0.32);
+    }
+
+    // boost indicator
+    if (t.boostMult > 0) {
+      ctx.font = '9px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⬆️', x - cs*0.32, y - cs*0.32);
+    }
+  }
+}
+
+function drawAnts() {
+  for (const ant of state.ants) {
+    if (ant.dead) continue;
+    const x = ant.x;
+    const y = ant.y;
+    const cs = cellSize;
+
+    if (ant.isBoss) {
+      const s = ant.size || 1.8;
+      const r = cs * 0.5 * s;
+
+      // Pulsing glow
+      const pulse = 0.7 + 0.3 * Math.sin(Date.now() / 300);
+      ctx.beginPath();
+      ctx.arc(x, y, r * 1.3, 0, Math.PI * 2);
+      ctx.fillStyle = ant.color + Math.floor(pulse * 80).toString(16).padStart(2,'0');
+      ctx.fill();
+
+      // Shadow
+      ctx.beginPath();
+      ctx.ellipse(x, y + r * 0.7, r * 0.8, r * 0.3, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.fill();
+
+      // Body circle
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = ant.color + 'CC';
+      ctx.fill();
+      ctx.strokeStyle = '#FF8888';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Emoji
+      ctx.font = `${cs * s * 0.65}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ant.emoji, x, y + 2);
+
+      // HP bar (wide)
+      const bw = r * 2.2;
+      const bx = x - bw / 2;
+      const by = y - r - 10;
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.fillRect(bx, by, bw, 8);
+      const hpPct = Math.max(0, ant.hp / ant.maxHp);
+      const hpColor = hpPct > 0.5 ? '#FF4444' : hpPct > 0.25 ? '#FF8800' : '#FF0000';
+      ctx.fillStyle = hpColor;
+      ctx.fillRect(bx, by, bw * hpPct, 8);
+      ctx.strokeStyle = '#880000';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(bx, by, bw, 8);
+
+      continue;
+    }
+
+    // Shadow
+    ctx.beginPath();
+    ctx.ellipse(x, y + cs*0.28, cs*0.2, cs*0.1, 0, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fill();
+
+    // ant emoji
+    ctx.font = `${cs*0.52}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    if (ant.type === 'red') {
+      ctx.fillStyle = 'rgba(255,80,80,0.8)';
+      ctx.beginPath();
+      ctx.arc(x, y, cs*0.3, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.fillText('🐜', x, y);
+
+    // stun indicator
+    if (ant.stunTimer > 0) {
+      ctx.font = '10px serif';
+      ctx.fillText('💫', x + cs*0.25, y - cs*0.3);
+    }
+
+    // hp bar
+    const hpPct = ant.hp / ant.maxHp;
+    const bw = cs * 0.7;
+    const bx = x - bw/2;
+    const by = y - cs*0.42;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(bx, by, bw, 4);
+    ctx.fillStyle = hpPct > 0.5 ? '#4CAF50' : hpPct > 0.25 ? '#FF9800' : '#F44336';
+    ctx.fillRect(bx, by, bw * hpPct, 4);
+  }
+}
+
+function drawBullets() {
+  for (const b of state.bullets) {
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.size, 0, Math.PI*2);
+    ctx.fillStyle = b.color;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.size*0.5, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.fill();
+  }
+}
+
+function drawParticles() {
+  for (const p of state.particles) {
+    const alpha = p.life / p.maxLife;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI*2);
+    ctx.fillStyle = p.color + Math.floor(alpha * 255).toString(16).padStart(2,'0');
+    ctx.fill();
+  }
+}
+
+// ============================================================
+// INPUT
+// ============================================================
+state.mouseCell = null;
+
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const c = Math.floor(mx / cellSize);
+  const r = Math.floor(my / cellSize);
+  const map = state.map;
+  if (c >= 0 && c < map.cols && r >= 0 && r < map.rows) {
+    state.mouseCell = { c, r };
+  }
+});
+
+canvas.addEventListener('mouseleave', () => { state.mouseCell = null; });
+
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const c = Math.floor(mx / cellSize);
+  const r = Math.floor(my / cellSize);
+  const key = c + ',' + r;
+  const map = state.map;
+
+  if (c < 0 || c >= map.cols || r < 0 || r >= map.rows) return;
+
+  // check if clicking existing teddy
+  const px = c * cellSize + cellSize / 2;
+  const py = r * cellSize + cellSize / 2;
+
+  const existingTeddy = state.teddies.find(t => {
+    return Math.abs(t.px - px) < cellSize/2 && Math.abs(t.py - py) < cellSize/2;
+  });
+
+  if (existingTeddy) {
+    state.selectedPlaced = existingTeddy.id;
+    state.selectedType = null;
+    updateSelectedPanel(existingTeddy);
+    return;
+  }
+
+  // placing mode
+  if (state.selectedType) {
+    if (state.pathSet.has(key)) { notify('Cannot place on path!'); return; }
+    const baseKey = map.basePos[0]+','+map.basePos[1];
+    if (key === baseKey) { notify('Cannot place on base!'); return; }
+    const def = TEDDY_TYPES[state.selectedType];
+    if (state.fluff < def.cost) { notify('Not enough Fluff! 🪄'); return; }
+    // check no duplicate
+    if (state.teddies.find(t => t.col === c && t.row === r)) { notify('Cell occupied!'); return; }
+
+    state.fluff -= def.cost;
+    document.getElementById('fluff-val').textContent = state.fluff;
+    state.teddies.push({
+      id: state.nextId++,
+      type: state.selectedType,
+      col: c, row: r,
+      px, py,
+      cooldown: 0,
+      stunned: false,
+      stunTimer: 0,
+      level: 1,
+      boostMult: 0,
+      kills: 0,
+    });
+    spawnParticles(px, py, TEDDY_TYPES[state.selectedType].color, 10);
+  } else {
+    // deselect placed
+    state.selectedPlaced = null;
+    document.getElementById('sel-panel').style.display = 'none';
+  }
+});
+
+canvas.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  state.selectedType = null;
+  state.selectedPlaced = null;
+  document.querySelectorAll('.teddy-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('placing-info').textContent = '';
+  document.getElementById('sel-panel').style.display = 'none';
+});
+
+// ============================================================
+// UI FUNCTIONS
+// ============================================================
+function selectTeddy(type) {
+  if (state.selectedType === type) {
+    state.selectedType = null;
+    document.getElementById('card-'+type).classList.remove('selected');
+    document.getElementById('placing-info').textContent = '';
+    return;
+  }
+  state.selectedType = type;
+  state.selectedPlaced = null;
+  document.querySelectorAll('.teddy-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('card-'+type).classList.add('selected');
+  const def = TEDDY_TYPES[type];
+  document.getElementById('placing-info').textContent = `Placing: ${def.emoji} ${def.name} (${def.cost} 🪄)`;
+  document.getElementById('sel-panel').style.display = 'none';
+}
+
+function updateSelectedPanel(teddy) {
+  const def = TEDDY_TYPES[teddy.type];
+  document.getElementById('sel-panel').style.display = 'block';
+  document.getElementById('sel-name').textContent = def.emoji + ' ' + def.name;
+  document.getElementById('sel-desc').textContent = def.desc;
+  document.getElementById('sell-btn').style.display = 'block';
+
+  // upgrades
+  const section = document.getElementById('upgrade-section');
+  section.innerHTML = '';
+  const upgradeCost = teddy.level * 80;
+  if (teddy.level < 3) {
+    const btn = document.createElement('button');
+    btn.className = 'upgrade-btn';
+    btn.textContent = `⬆️ Upgrade Lv${teddy.level+1} (${upgradeCost}🪄)`;
+    btn.disabled = state.fluff < upgradeCost;
+    btn.onclick = () => upgradeTeddy(teddy.id);
+    section.appendChild(btn);
+  }
+}
+
+function sellSelected() {
+  if (!state.selectedPlaced) return;
+  const idx = state.teddies.findIndex(t => t.id === state.selectedPlaced);
+  if (idx < 0) return;
+  const t = state.teddies[idx];
+  const def = TEDDY_TYPES[t.type];
+  const sellVal = Math.floor(def.cost * 0.6 * t.level);
+  state.fluff += sellVal;
+  document.getElementById('fluff-val').textContent = state.fluff;
+  spawnParticles(t.px, t.py, '#F4A425', 12);
+  state.teddies.splice(idx, 1);
+  state.selectedPlaced = null;
+  document.getElementById('sel-panel').style.display = 'none';
+  notify(`Sold for ${sellVal} 🪄`);
+}
+
+function upgradeTeddy(id) {
+  const t = state.teddies.find(t => t.id === id);
+  if (!t || t.level >= 3) return;
+  const cost = t.level * 80;
+  if (state.fluff < cost) { notify('Not enough Fluff!'); return; }
+  state.fluff -= cost;
+  document.getElementById('fluff-val').textContent = state.fluff;
+  t.level++;
+  spawnParticles(t.px, t.py, '#F4A425', 15);
+  updateSelectedPanel(t);
+}
+
+function startWave() {
+  if (state.waveActive) return;
+  state.wave++;
+  document.getElementById('wave-num').textContent = state.wave;
+  state.spawnQueue = buildWave(state.wave);
+  state.spawnTimer = 0;
+  state.waveActive = true;
+  document.getElementById('wave-btn').disabled = true;
+
+  const isBoss = isBossWave(state.wave);
+  if (isBoss) {
+    document.getElementById('wave-btn').textContent = '💀 BOSS WAVE ' + state.wave;
+    document.getElementById('wave-bar').classList.remove('hidden');
+    document.getElementById('wave-bar').textContent = `⚠️ BOSS WAVE ${state.wave} — Escorts + BOSS incoming!`;
+  } else {
+    document.getElementById('wave-btn').textContent = '⚔️ Wave ' + state.wave;
+    document.getElementById('wave-bar').classList.remove('hidden');
+    document.getElementById('wave-bar').textContent = `Wave ${state.wave} — ${state.spawnQueue.length} ants incoming!`;
+  }
+
+  if (state.wave > 1) {
+    const bonus = 30 + state.wave * 5;
+    state.fluff += bonus;
+    document.getElementById('fluff-val').textContent = state.fluff;
+    if (!isBoss) notify(`Wave ${state.wave} started! +${bonus} 🪄 bonus`);
+  }
+}
+
+function checkWaveEnd() {
+  if (!state.waveActive) return;
+  if (state.spawnQueue.length === 0 && state.ants.length === 0) {
+    state.waveActive = false;
+    state.activeBoss = null;
+    document.getElementById('boss-bar').classList.remove('visible');
+    document.getElementById('wave-bar').classList.add('hidden');
+
+    const reward = 40 + state.wave * 10;
+    state.fluff += reward;
+    document.getElementById('fluff-val').textContent = state.fluff;
+
+    // Check win or endless continuation
+    if (state.wave >= 15 && !state.endlessMode) {
+      // Show victory screen with endless option
+      triggerWin();
+      return;
+    }
+
+    const nextIsBoss = isBossWave(state.wave + 1);
+    if (nextIsBoss) {
+      document.getElementById('wave-btn').disabled = false;
+      document.getElementById('wave-btn').textContent = `⚠️ BOSS Wave ${state.wave + 1}`;
+      notify(`Wave ${state.wave} cleared! +${reward} 🪄 — ⚠️ BOSS next!`);
+    } else {
+      document.getElementById('wave-btn').disabled = false;
+      document.getElementById('wave-btn').textContent = '▶ Start Wave ' + (state.wave + 1);
+      notify(`Wave ${state.wave} cleared! +${reward} 🪄`);
+    }
+  }
+}
+
+function toggleSpeed() {
+  state.speed = state.speed === 1 ? 2 : state.speed === 2 ? 3 : 1;
+  document.getElementById('speed-btn').textContent = `⚡ ${state.speed}x`;
+}
+
+function notify(msg) {
+  const el = document.getElementById('notif');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(notify._t);
+  notify._t = setTimeout(() => el.classList.add('hidden'), 2500);
+}
+
+function triggerGameOver() {
+  if (state.gameOver) return;
+  state.gameOver = true;
+  cancelAnimationFrame(animId);
+  document.getElementById('boss-intro').style.display = 'none';
+  const diff = DIFFICULTY[state.difficulty];
+  const box = document.querySelector('.overlay-box');
+  box.innerHTML = `
+    <h2>😢 Game Over</h2>
+    <p>The ants reached your base on Wave <strong>${state.wave}</strong>!</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0;font-family:'Fredoka One',cursive">
+      <div style="background:var(--ui-panel);border:2px solid var(--ui-border);border-radius:10px;padding:10px">
+        <div style="font-size:24px">💀</div>
+        <div style="color:var(--honey-light);font-size:18px">${state.totalKills.toLocaleString()}</div>
+        <div style="font-size:11px;color:#aaa">Ants Killed</div>
+      </div>
+      <div style="background:var(--ui-panel);border:2px solid var(--ui-border);border-radius:10px;padding:10px">
+        <div style="font-size:24px">👹</div>
+        <div style="color:var(--honey-light);font-size:18px">${state.bossCount}</div>
+        <div style="font-size:11px;color:#aaa">Bosses Defeated</div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:#aaa">Difficulty: ${diff.label}</p>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:8px">
+      <button class="btn btn-honey" style="font-size:16px;padding:10px 22px" onclick="location.reload()">🔄 Try Again</button>
+      <button class="btn btn-gray" style="font-size:16px;padding:10px 22px" onclick="showMenu()">🗺️ Menu</button>
+    </div>
+  `;
+  document.getElementById('overlay').classList.remove('hidden');
+}
+
+function triggerWin() {
+  if (state.gameOver) return;
+  state.gameOver = true;
+  document.getElementById('boss-intro').style.display = 'none';
+  const diff = DIFFICULTY[state.difficulty];
+  const box = document.querySelector('.overlay-box');
+  box.innerHTML = `
+    <h2>🎉 Victory!</h2>
+    <p>You defeated the <strong>Ant Overlord</strong> and defended the Teddy Kingdom!</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:14px 0;font-family:'Fredoka One',cursive">
+      <div style="background:var(--ui-panel);border:2px solid var(--ui-border);border-radius:10px;padding:8px">
+        <div style="font-size:22px">💀</div>
+        <div style="color:var(--honey-light);font-size:16px">${state.totalKills.toLocaleString()}</div>
+        <div style="font-size:10px;color:#aaa">Kills</div>
+      </div>
+      <div style="background:var(--ui-panel);border:2px solid var(--ui-border);border-radius:10px;padding:8px">
+        <div style="font-size:22px">🏰</div>
+        <div style="color:var(--honey-light);font-size:16px">${state.lives}</div>
+        <div style="font-size:10px;color:#aaa">Lives Left</div>
+      </div>
+      <div style="background:var(--ui-panel);border:2px solid var(--ui-border);border-radius:10px;padding:8px">
+        <div style="font-size:22px">🧸</div>
+        <div style="color:var(--honey-light);font-size:16px">${state.teddies.length}</div>
+        <div style="font-size:10px;color:#aaa">Teddies</div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:#FEDD8B;margin-bottom:14px">Difficulty: ${diff.label}<br>Think you can survive <strong>Endless Mode</strong>? A boss every 50 waves — forever!</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-honey" style="font-size:15px;padding:9px 20px" onclick="startEndlessMode()">♾️ Endless!</button>
+      <button class="btn btn-gray" style="font-size:15px;padding:9px 20px" onclick="showMenu()">🗺️ New Game</button>
+    </div>
+  `;
+  document.getElementById('overlay').classList.remove('hidden');
+}
+
+function startEndlessMode() {
+  state.endlessMode = true;
+  state.gameOver = false;
+  countdownTimer = COUNTDOWN_DURATION;
+  document.getElementById('endless-badge').classList.add('visible');
+  document.getElementById('overlay').classList.add('hidden');
+  document.getElementById('wave-btn').disabled = false;
+  document.getElementById('wave-btn').textContent = '▶ Start Wave 16';
+  notify('♾️ ENDLESS MODE! Boss every 50 waves. Good luck!');
+}
+
+function showMenu() {
+  const box = document.querySelector('.overlay-box');
+  box.innerHTML = `
+    <h2>🗺️ Select Map</h2>
+    <p>Choose your battlefield (resets current game)</p>
+    <div class="map-select">
+      <div class="map-btn ${state.mapIdx===0?'selected':''}" onclick="selectMap(0)"><span class="map-icon">🧺</span>Picnic Grounds</div>
+      <div class="map-btn ${state.mapIdx===1?'selected':''}" onclick="selectMap(1)"><span class="map-icon">🏭</span>Honey Factory</div>
+      <div class="map-btn ${state.mapIdx===2?'selected':''}" onclick="selectMap(2)"><span class="map-icon">🌳</span>Treehouse</div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:8px">
+      <button class="btn btn-honey" onclick="startGame()">🎮 New Game</button>
+      <button class="btn btn-gray" onclick="document.getElementById('overlay').classList.add('hidden')">↩ Resume</button>
+    </div>
+  `;
+  document.getElementById('overlay').classList.remove('hidden');
+}
+
+let selectedDiff = 'easy';
+const DIFF_DESCS = {
+  easy: 'More starting fluff, ants deal less damage',
+  normal: 'The classic Teddy Defense experience',
+  hard: 'Tougher ants, less fluff, fewer lives — good luck!',
+};
+function selectDiff(d) {
+  selectedDiff = d;
+  ['easy','normal','hard'].forEach(x => {
+    const el = document.getElementById('diff-'+x);
+    if (!el) return;
+    if (x === d) {
+      el.style.borderColor = '#F4A425';
+      el.style.background = x === 'easy' ? '#4A7C59' : x === 'hard' ? '#8B2020' : '#7A4A28';
+    } else {
+      el.style.borderColor = 'var(--ui-border)';
+      el.style.background = '#5C3820';
+    }
+  });
+  const dd = document.getElementById('diff-desc');
+  if (dd) dd.textContent = DIFF_DESCS[d];
+}
+let selectedMapIdx = 0;
+function selectMap(idx) {
+  selectedMapIdx = idx;
+  document.querySelectorAll('.map-btn').forEach((b,i) => {
+    b.classList.toggle('selected', i === idx);
+  });
+}
+
+function startGame() {
+  const diff = DIFFICULTY[selectedDiff];
+  state.mapIdx = selectedMapIdx;
+  state.map = MAPS[state.mapIdx];
+  state.difficulty = selectedDiff;
+  state.lives = diff.startLives;
+  state.fluff = diff.startFluff;
+  state.wave = 0;
+  state.teddies = [];
+  state.ants = [];
+  state.bullets = [];
+  state.particles = [];
+  state.waveActive = false;
+  state.spawnQueue = [];
+  state.selectedType = null;
+  state.selectedPlaced = null;
+  state.gameOver = false;
+  state.endlessMode = false;
+  state.bossCount = 0;
+  state.activeBoss = null;
+  state.totalKills = 0;
+  state.score = 0;
+  unlockedAchievements.clear();
+  autoWave = false;
+  countdownTimer = COUNTDOWN_DURATION;
+  document.getElementById('auto-wave-btn').textContent = '🔄 Manual';
+  document.getElementById('auto-wave-btn').style.background = '#555';
+
+  document.getElementById('lives-val').textContent = state.lives;
+  document.getElementById('lives-val').classList.remove('lives-low');
+  document.getElementById('fluff-val').textContent = state.fluff;
+  document.getElementById('kills-val').textContent = 0;
+  document.getElementById('wave-num').textContent = 0;
+  document.getElementById('wave-btn').disabled = false;
+  document.getElementById('wave-btn').textContent = '▶ Start Wave 1';
+  document.getElementById('wave-bar').classList.add('hidden');
+  document.getElementById('sel-panel').style.display = 'none';
+  document.getElementById('placing-info').textContent = '';
+  document.getElementById('endless-badge').classList.remove('visible');
+  document.getElementById('boss-bar').classList.remove('visible');
+  document.getElementById('boss-intro').style.display = 'none';
+
+  // Difficulty badge
+  const badge = document.getElementById('diff-badge');
+  badge.textContent = diff.label;
+  badge.style.display = 'inline-block';
+  badge.style.background = diff.color + '44';
+  badge.style.border = `2px solid ${diff.color}`;
+  badge.style.color = diff.color;
+
+  document.querySelectorAll('.teddy-card').forEach(c => c.classList.remove('selected'));
+  setupMap();
+  document.getElementById('overlay').classList.add('hidden');
+
+  if (!animId) {
+    lastTime = performance.now();
+    animId = requestAnimationFrame(gameLoop);
+  }
+}
+
+// ============================================================
+// MINIMAP
+// ============================================================
+function renderMinimap() {
+  const mc = document.getElementById('minimap');
+  if (!mc) return;
+  const mctx = mc.getContext('2d');
+  const map = state.map;
+  const mw = mc.width, mh = mc.height;
+  const cw = mw / map.cols, ch = mh / map.rows;
+
+  mctx.clearRect(0, 0, mw, mh);
+  mctx.fillStyle = map.bg;
+  mctx.fillRect(0, 0, mw, mh);
+
+  // path
+  mctx.fillStyle = '#D4A574';
+  for (const [c, r] of map.path) {
+    mctx.fillRect(c*cw, r*ch, cw+0.5, ch+0.5);
+  }
+
+  // teddies
+  for (const t of state.teddies) {
+    const def = TEDDY_TYPES[t.type];
+    mctx.beginPath();
+    mctx.arc(t.col*cw+cw/2, t.row*ch+ch/2, Math.max(cw,ch)*0.45, 0, Math.PI*2);
+    mctx.fillStyle = t.stunned ? '#3344AA' : def.color;
+    mctx.fill();
+  }
+
+  // ants
+  for (const ant of state.ants) {
+    if (ant.dead) continue;
+    const ax = ant.x / cellSize * cw;
+    const ay = ant.y / cellSize * ch;
+    mctx.beginPath();
+    mctx.arc(ax, ay, ant.isBoss ? Math.max(cw,ch)*0.7 : Math.max(cw,ch)*0.35, 0, Math.PI*2);
+    mctx.fillStyle = ant.isBoss ? ant.color : (ant.type === 'red' ? '#FF4444' : '#8B5E3C');
+    mctx.fill();
+  }
+
+  // base
+  const bp = map.basePos;
+  mctx.fillStyle = '#F4A425';
+  mctx.fillRect(bp[0]*cw, bp[1]*ch, cw, ch);
+
+  // border
+  mctx.strokeStyle = 'rgba(200,134,78,0.5)';
+  mctx.lineWidth = 1;
+  mctx.strokeRect(0.5, 0.5, mw-1, mh-1);
+}
+
+// ============================================================
+// STATS PANEL
+// ============================================================
+function updateStatsPanel() {
+  document.getElementById('stat-teddies').textContent = state.teddies.length;
+  document.getElementById('stat-kills').textContent = state.totalKills.toLocaleString();
+  document.getElementById('stat-bosses').textContent = state.bossCount;
+  document.getElementById('stat-ants').textContent = state.ants.filter(a=>!a.dead).length;
+  // next boss wave
+  let nextBoss = '—';
+  if (!state.endlessMode && state.wave < 15) nextBoss = 'Wave 15';
+  else if (state.endlessMode) {
+    const base = Math.ceil((state.wave + 1) / 50) * 50;
+    nextBoss = 'Wave ' + base;
+  }
+  document.getElementById('stat-nextboss').textContent = nextBoss;
+}
+
+// ============================================================
+// WAVE COUNTDOWN / AUTO-WAVE
+// ============================================================
+let autoWave = false;
+let countdownTimer = 0;
+const COUNTDOWN_DURATION = 12;
+
+function toggleAutoWave() {
+  autoWave = !autoWave;
+  const btn = document.getElementById('auto-wave-btn');
+  btn.textContent = autoWave ? '⏩ Auto' : '🔄 Manual';
+  btn.style.background = autoWave ? '#4A7C59' : '#555';
+  if (autoWave) notify('Auto-wave ON — waves start automatically!');
+  else notify('Auto-wave OFF — press Start Wave manually');
+}
+
+function updateCountdown(dt) {
+  const cdEl = document.getElementById('wave-countdown');
+  if (!state.waveActive && state.wave > 0 && !state.gameOver) {
+    if (autoWave) {
+      countdownTimer -= dt;
+      cdEl.style.display = 'flex';
+      document.getElementById('countdown-val').textContent = Math.max(0, Math.ceil(countdownTimer));
+      if (countdownTimer <= 0) {
+        cdEl.style.display = 'none';
+        countdownTimer = COUNTDOWN_DURATION;
+        startWave();
+      }
+    } else {
+      cdEl.style.display = 'none';
+    }
+  } else {
+    countdownTimer = COUNTDOWN_DURATION;
+    cdEl.style.display = 'none';
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('resize', () => { resizeCanvas(); });
+setupMap();
+lastTime = performance.now();
+animId = requestAnimationFrame(gameLoop);
+</script>
+<!-- BOSS INTRO OVERLAY -->
+<div id="boss-intro" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;flex-direction:column;backdrop-filter:blur(6px)">
+  <div id="boss-intro-box" style="text-align:center;animation:bossIntroAnim 0.5s ease-out">
+    <div id="boss-intro-emoji" style="font-size:90px;line-height:1;filter:drop-shadow(0 0 30px #FF0000)">👹</div>
+    <div id="boss-intro-name" style="font-family:'Fredoka One',cursive;font-size:42px;color:#FF4444;text-shadow:0 0 20px #FF0000,2px 2px 0 #000;margin:12px 0">ANT OVERLORD</div>
+    <div id="boss-intro-desc" style="color:#FFB0B0;font-size:16px;max-width:380px;line-height:1.5;margin-bottom:20px">desc</div>
+    <div id="boss-intro-stats" style="display:flex;gap:20px;justify-content:center;margin-bottom:24px;font-family:'Fredoka One',cursive;font-size:14px;color:#FEDD8B"></div>
+    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#FF8888;animation:pulse 0.8s infinite">⚠️ PREPARE YOUR DEFENSES ⚠️</div>
+  </div>
+</div>
+
+<!-- ACHIEVEMENT TOAST -->
+<div id="achievement" style="display:none;position:fixed;bottom:60px;right:16px;z-index:300;background:linear-gradient(135deg,#3D2314,#5C3820);border:3px solid #F4A425;border-radius:16px;padding:12px 18px;max-width:260px;box-shadow:0 4px 20px rgba(0,0,0,0.6);animation:achieveSlide 0.4s ease-out">
+  <div style="font-family:'Fredoka One',cursive;font-size:11px;color:#F4A425;letter-spacing:1px;margin-bottom:4px">🏆 ACHIEVEMENT UNLOCKED</div>
+  <div id="achieve-name" style="font-family:'Fredoka One',cursive;font-size:16px;color:#FEDD8B">Name</div>
+  <div id="achieve-desc" style="font-size:12px;color:#CCC;margin-top:2px">Desc</div>
+</div>
+
+<style>
+@keyframes bossIntroAnim { from { transform:scale(0.5) translateY(-40px); opacity:0; } to { transform:scale(1) translateY(0); opacity:1; } }
+@keyframes achieveSlide { from { transform:translateX(120%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+@keyframes floatUp { from { transform:translateY(0); opacity:1; } to { transform:translateY(-50px); opacity:0; } }
+.float-dmg {
+  position: absolute;
+  pointer-events: none;
+  font-family: 'Fredoka One', cursive;
+  font-size: 14px;
+  font-weight: 900;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  animation: floatUp 0.9s ease-out forwards;
+  z-index: 20;
+  white-space: nowrap;
+}
+#diff-badge {
+  border-radius: 14px;
+  padding: 3px 10px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 12px;
+  font-weight: 800;
+}
+</style>
+
+</body>
+</html>
